@@ -1,61 +1,34 @@
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
-from django.urls import reverse
-from django.template.loader import render_to_string
+# views.py
+from rest_framework import generics
+from .models import Robot
+from .serializers import RobotSerializer
+from .utils import generate_random_position_id
 
-monthly_challenge = {
-    "january": "January Now!",
-    "february": "February Now!",
-    "march": "March Now!",
-    "april": "April Now!",
-    "may": "May Now!",
-    "june": "June Now!",
-    "july": "July Now!",
-    "august": "August Now!",
-    "september": "September Now!",
-    "october": "October Now!",
-    "november": "November Now!",
-    "december": "December Now!"
-}
+# View để trả về danh sách các robots
+class RobotListView(generics.ListAPIView):
+    queryset = Robot.objects.all()
+    serializer_class = RobotSerializer
 
-def index(request):
-    list_items = ""
-    months = list(monthly_challenge.keys())
-    
-    # for month in months:
-    #     capitalized_month = month.capitalize()
-    #     month_path = reverse("monthly_", args=[month])
-    #     list_items += f"<li><a href=\"{month_path}\">{capitalized_month}</a></li>"   
-    # response_data = f"<ul>{list_items}</ul>"
-    # return HttpResponse(response_data)
-    
-    return render(request, "challenges/index.html", {
-        "months": months
-    })
+# View để tạo mới một robot
+class RobotCreateView(generics.CreateAPIView):
+    queryset = Robot.objects.all()
+    serializer_class = RobotSerializer
 
-# Create your views here.
-def monthly_challenges_by_number(request, month):
-    months = list(monthly_challenge.keys())
-    
-    if month > len(months):
-       return HttpResponseNotFound("Invalid month!") 
-   
-    redirect_month = months[month-1]
-    
-    redirect_path = reverse("monthly_", args=[redirect_month])
-    
-    return HttpResponseRedirect(redirect_path)
+class RobotDetailView(generics.RetrieveAPIView):
+    queryset = Robot.objects.all()
+    serializer_class = RobotSerializer
+    lookup_field = 'robot_id'  # Sử dụng robot_id làm khóa chính
 
-def monthly_challenges(request, month):
-    try:   
-        text_ = monthly_challenge[month]
-        # data_response = f"<h1>{text}</h1>"
-        # data_response = render_to_string("challenges/challenge.html")
-        return render(request, "challenges/challenge.html", {
-            "text": text_,
-            "month_challenge": month
-        })
-        # return HttpResponse(data_response)
-    except:
-        return HttpResponseNotFound("<h1>Error!</h1>")
-        
+    def get(self, request, *args, **kwargs):
+        # Truy cập robot
+        response = super().get(request, *args, **kwargs)
+        robot = self.get_object()
+
+        # Sinh ngẫu nhiên position_id và cập nhật robot
+        new_position_id = generate_random_position_id()
+        robot.position_id = new_position_id
+        robot.save()
+
+        # Trả về thông tin robot đã được cập nhật
+        response.data['position_id'] = new_position_id
+        return response

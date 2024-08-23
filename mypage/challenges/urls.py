@@ -1,10 +1,9 @@
+# urls.py
 from django.urls import path
-from . import views
-
+from .views import RobotDetailView, RobotListView, RobotCreateView
 
 urlpatterns = [
-    path("", views.index),
-    path("<int:month>", views.monthly_challenges_by_number),
-    path("<str:month>", views.monthly_challenges, name="monthly_")
+    path('robots/', RobotListView.as_view(), name='robot-list'),
+    path('robots/create/', RobotCreateView.as_view(), name='robot-create'),
+    path('robots/<str:robot_id>/', RobotDetailView.as_view(), name='robot-detail')
 ]
-
