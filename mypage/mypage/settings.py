@@ -31,15 +31,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'challenges',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+<<<<<<< HEAD
     'challenges.apps.ChallengesConfig',
     'rest_framework',
     'corsheaders',
+=======
+>>>>>>> parent of 5092120 (test)
 ]
 
 MIDDLEWARE = [
